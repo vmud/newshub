@@ -1,0 +1,19 @@
+# Always load this context first
+CONTEXT_FILES:
+  - config/newshub.manifest.yaml
+  - docs/system_prompt.md
+  - docs/acceptance/visual_frontpage_v0.md
+
+# Working mode
+- Ask <=5 blocking questions, else proceed with explicit assumptions.
+- Deliver only the current slice: "FrontPage v0 (48h demo)".
+- Prefer contracts over code; minimal diffs only.
+- Produce a Vercel Preview URL for every slice.
+- Enforce Demo Gate (DoD) before claiming "done".
+- Push back on scope creep with Focus/Value/Risk/Cost/Demo tests.
+- Token discipline: no long examples or boilerplate unless user says "code:".
+
+# Hard constraints
+- Scale <=1k users, <=25 concurrent.
+- Low/no-cost services; Vercel + Supabase defaults.
+- Frontend via Subframe components (no bespoke UI unless asked).

@@ -1,0 +1,318 @@
+# Buzzwords Blacklist for Content Linting
+# Words and phrases to flag or avoid in news content
+# Format: one term per line, case-insensitive matching
+
+# Corporate Jargon
+synergy
+paradigm shift
+best-in-class
+world-class
+state-of-the-art
+cutting-edge
+next-generation
+revolutionary
+groundbreaking
+game-changing
+disruptive
+innovative
+transformative
+holistic
+strategic
+optimize
+maximize
+leverage
+utilize
+actionable
+scalable
+robust
+streamline
+dynamic
+agile
+flexible
+proactive
+reactive
+collaborative
+comprehensive
+integrated
+seamless
+efficient
+effective
+impactful
+meaningful
+significant
+substantial
+considerable
+extensive
+comprehensive
+
+# Tech Buzzwords  
+disruptive innovation
+digital transformation
+artificial intelligence
+machine learning
+big data
+blockchain
+cloud-native
+microservices
+serverless
+DevOps
+containerization
+orchestration
+automation
+intelligent automation
+hyper-automation
+low-code
+no-code
+citizen developer
+digital-first
+API-first
+mobile-first
+cloud-first
+data-driven
+AI-powered
+ML-enabled
+blockchain-enabled
+IoT-enabled
+5G-enabled
+
+# Marketing Speak
+game-changer
+industry-leading
+market-leading
+award-winning
+premier
+premium
+superior
+ultimate
+perfect
+ideal
+unique
+exclusive
+revolutionary
+breakthrough
+advanced
+sophisticated
+professional
+enterprise-grade
+military-grade
+bank-grade
+institutional-quality
+white-glove
+turnkey
+plug-and-play
+one-stop-shop
+end-to-end
+soup-to-nuts
+
+# Vague Qualifiers
+very
+extremely  
+incredibly
+amazingly
+surprisingly
+remarkably
+exceptionally
+extraordinarily
+particularly
+especially
+quite
+rather
+fairly
+pretty
+somewhat
+really
+truly
+actually
+literally
+basically
+essentially
+fundamentally
+ultimately
+obviously
+clearly
+certainly
+definitely
+absolutely
+completely
+totally
+entirely
+fully
+highly
+deeply
+strongly
+greatly
+significantly
+substantially
+considerably
+extensively
+comprehensively
+
+# Business Clichés
+think outside the box
+paradigm shift
+low-hanging fruit
+move the needle
+circle back
+touch base
+reach out
+loop in
+drill down
+deep dive
+take it offline
+run it up the flagpole
+boil the ocean
+drinking the Kool-Aid
+move the goalposts
+push the envelope
+shift gears
+change course
+pivot
+iterate
+ideate
+brainstorm
+workshop
+socialize
+evangelize
+champion
+spearhead
+drive
+execute
+deliver
+operationalize
+monetize
+capitalize
+incentivize
+prioritize
+strategize
+synergize
+optimize
+maximize
+minimize
+marginalize
+
+# Finance/Business Buzzwords
+value-added
+value proposition
+competitive advantage
+core competency
+best practice
+benchmark
+baseline
+milestone
+deliverable
+stakeholder
+ecosystem
+portfolio
+pipeline
+roadmap
+framework
+infrastructure
+architecture
+platform
+solution
+offering
+capability
+functionality
+feature set
+suite
+stack
+toolkit
+arsenal
+repository
+library
+catalogue
+inventory
+dashboard
+interface
+workflow
+process
+procedure
+methodology
+approach
+strategy
+tactic
+initiative
+program
+project
+campaign
+effort
+endeavor
+venture
+enterprise
+operation
+activity
+function
+service
+product
+asset
+resource
+investment
+capital
+funding
+financing
+revenue
+profit
+margin
+ROI
+EBITDA
+KPI
+metric
+analytics
+insights
+intelligence
+visibility
+transparency
+accountability
+governance
+compliance
+audit
+assessment
+evaluation
+analysis
+review
+optimization
+enhancement
+improvement
+upgrade
+modernization
+
+# Technology Jargon
+next-gen
+cutting-edge tech
+bleeding-edge
+future-proof
+enterprise-ready
+production-ready
+battle-tested
+proven
+mature
+stable
+reliable
+secure
+performant
+responsive
+intuitive
+user-friendly
+seamless
+frictionless
+effortless
+simple
+elegant
+sophisticated
+powerful
+flexible
+extensible
+modular
+composable
+configurable
+customizable
+personalizable
+adaptive
+intelligent
+smart
+cognitive
+contextual
+predictive
+prescriptive
+automated
+autonomous

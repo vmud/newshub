@@ -1,0 +1,61 @@
+product_name: NewsHub
+environment: dev
+nsm: daily_brief_completion_rate
+driver_metrics:
+  - frontpage_ttf_render_ms
+  - ingestion_freshness_hours
+  - client_news_ctr
+cost:
+  api_budget_monthly_usd: 50
+
+companies:
+  - canonical: Qualcomm
+    aliases: [Qualcomm, Snapdragon]
+  - canonical: Google
+    aliases: [Google, Android, Pixel]
+  - canonical: Samsung
+    aliases: [Samsung, Galaxy]
+  - canonical: Whirlpool
+    aliases: [Whirlpool, KitchenAid, Maytag]
+  - canonical: Best Buy
+    aliases: ["Best Buy", "Geek Squad"]
+
+providers:
+  news: [perplexity, gdelt]
+  filings: [sec_edgar]
+  rss: []           # add trade feeds later
+  social: []        # enabled in a later slice
+
+feature_flags:
+  snacks_top3_on: true
+  frontpage_filters: false
+
+cron_utc:
+  news: ["0 11 * * *", "0 16 * * *", "0 21 * * *"]   # 7a/12p/5p ET
+  social: ["0 05 * * *"]                             # daily 24h window
+
+snacks_policy:
+  pass1_demo_top3: true
+  pass2_presummarize_top10_7am: true
+  noon_5pm_lazy_on_click: true
+  max_bullet_chars: 200
+  bullets_count: 3
+  bullet3_should: "why_it_matters"
+  latency_p95_ms: 2000
+  max_cost_per_summary_usd: 0.20
+
+paths:
+  system_prompt: docs/system_prompt.md
+  acceptance_frontpage_v0: docs/acceptance/visual_frontpage_v0.md
+  adrs_dir: docs/ADRs
+  decision_packets_dir: docs/decision_packets
+  style_guide: style/snacks_style_guide.md
+  buzzwords: style/buzzwords.txt
+  aliases: config/companies_aliases.yaml
+
+telemetry_events:
+  - frontpage_viewed
+  - headline_clicked
+  - ingest_run
+  - summary_generated
+  - snacks_lint_failed
