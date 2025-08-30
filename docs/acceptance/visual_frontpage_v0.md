@@ -22,3 +22,10 @@ Telemetry (must appear)
 
 Demo gate / DoD
 - Vercel preview URL + 5-step demo script passes + telemetry visible + 90-sec screencast + rollback note
+
+States
+- Loading skeletons, witty empty, “cached from last run” on provider error
+- Empty-state copy: “Quiet newsroom. We’ll refresh at 7a/12p/5p ET.”
+
+Component responsibilities
+- Render a visible Company pill on every card using the canonical company name.
