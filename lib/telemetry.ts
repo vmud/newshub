@@ -9,6 +9,11 @@ export interface TelemetryEvent {
 
 export async function trackEvent(eventData: TelemetryEvent) {
   try {
+    if (!supabase) {
+      console.warn('Supabase not configured, skipping telemetry')
+      return
+    }
+
     const { error } = await supabase
       .from('events_frontpage')
       .insert({

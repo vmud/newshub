@@ -15,6 +15,11 @@ export interface Article {
 
 export async function getTop10Articles(): Promise<Article[]> {
   try {
+    if (!supabase) {
+      console.warn('Supabase not configured, returning empty articles')
+      return []
+    }
+
     const { data: articles, error } = await supabase
       .from('articles')
       .select(`
