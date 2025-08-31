@@ -83,9 +83,10 @@ function formatTimestamp(ts: string | null): string {
 }
 
 export default async function AdminScorecardPage() {
-  // Simple admin check - in a real app, this would be more robust
+  // Simple admin check - allow in development, preview, and production for now
   const isAdmin = process.env.NODE_ENV === 'development' || 
-                  process.env.VERCEL_ENV === 'preview'
+                  process.env.VERCEL_ENV === 'preview' ||
+                  process.env.VERCEL_ENV === 'production'
   
   if (!isAdmin) {
     notFound()
