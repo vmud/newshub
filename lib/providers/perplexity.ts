@@ -56,7 +56,8 @@ export class PerplexityProvider implements NewsProvider {
         max_tokens: 2000,
         temperature: 0.1,
         return_related_questions: false,
-        search_domain_filter: ['techcrunch.com', 'theverge.com', 'engadget.com', 'androidcentral.com', 'reuters.com', 'bloomberg.com', 'cnbc.com', 'wsj.com']
+        // Remove domain filter to get broader results
+        // search_domain_filter: ['techcrunch.com', 'theverge.com', 'engadget.com', 'androidcentral.com', 'reuters.com', 'bloomberg.com', 'cnbc.com', 'wsj.com']
       })
     })
 

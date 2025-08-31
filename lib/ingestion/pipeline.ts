@@ -65,7 +65,7 @@ export class IngestionPipeline {
 
     // Get all company aliases
     const allAliases = Object.values(COMPANY_ALIASES).flat()
-    const sinceDt = new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
+    const sinceDt = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days for better coverage
 
     // Fetch from each provider
     for (const provider of this.providers) {

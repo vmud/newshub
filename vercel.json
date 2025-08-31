@@ -1,15 +1,15 @@
 {
   "crons": [
     {
-      "path": "/api/cron/news",
+      "path": "/api/ingest-news",
       "schedule": "0 11 * * *"
     },
     {
-      "path": "/api/cron/news",
+      "path": "/api/ingest-news",
       "schedule": "0 16 * * *"
     },
     {
-      "path": "/api/cron/news",
+      "path": "/api/ingest-news",
       "schedule": "0 21 * * *"
     }
   ]
