@@ -3,7 +3,6 @@ import { PerplexityProvider } from '@/lib/providers/perplexity'
 import { GDELTProvider } from '@/lib/providers/gdelt'
 import { NewsProvider, ProviderArticle, IngestionResult, IngestionRunSummary } from '@/lib/providers/types'
 import { trackEvent } from '@/lib/telemetry'
-import { createHash } from 'crypto'
 
 // Company aliases from config
 const COMPANY_ALIASES: Record<string, string[]> = {
@@ -303,7 +302,7 @@ export class IngestionPipeline {
     return DOMAIN_PRIORITIES[normalizedDomain] || DOMAIN_PRIORITIES.default
   }
 
-  private classifyError(error: any): string {
+  private classifyError(error: unknown): string {
     const errorStr = String(error).toLowerCase()
     
     if (errorStr.includes('timeout') || errorStr.includes('timed out')) {

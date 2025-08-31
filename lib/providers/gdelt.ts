@@ -1,5 +1,12 @@
 import { NewsProvider, ProviderArticle } from './types'
 
+interface GDELTArticle {
+  title: string
+  url: string
+  domain: string
+  seendate: string
+}
+
 export class GDELTProvider implements NewsProvider {
   name = 'gdelt'
   private baseUrl = 'https://api.gdeltproject.org/api/v2'
@@ -57,11 +64,11 @@ export class GDELTProvider implements NewsProvider {
     }
 
     return data.articles
-      .filter((article: any) => this.isValidArticle(article))
-      .map((article: any) => this.transformArticle(article, company))
+      .filter((article: GDELTArticle) => this.isValidArticle(article))
+      .map((article: GDELTArticle) => this.transformArticle(article, company))
   }
 
-  private isValidArticle(article: any): boolean {
+  private isValidArticle(article: GDELTArticle): boolean {
     return (
       article.title &&
       article.url &&
@@ -81,7 +88,7 @@ export class GDELTProvider implements NewsProvider {
     }
   }
 
-  private transformArticle(article: any, company: string): ProviderArticle {
+  private transformArticle(article: GDELTArticle, company: string): ProviderArticle {
     return {
       title: this.cleanTitle(article.title),
       url: this.normalizeUrl(article.url),

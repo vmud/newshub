@@ -62,7 +62,7 @@ export function FrontPage({ articles, isLoading = false, hasError = false }: Fro
         </header>
         <div className="text-center py-12">
           <p className="text-gray-600 mb-2">Cached from last run</p>
-          <p className="text-gray-500 text-sm">Quiet newsroom. We'll refresh at 7a/12p/5p ET.</p>
+          <p className="text-gray-500 text-sm">Quiet newsroom. We&apos;ll refresh at 7a/12p/5p ET.</p>
         </div>
       </div>
     )
@@ -77,7 +77,7 @@ export function FrontPage({ articles, isLoading = false, hasError = false }: Fro
         </header>
         <div className="text-center py-12">
           <RefreshCw className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <p className="text-gray-600">Quiet newsroom. We'll refresh at 7a/12p/5p ET.</p>
+          <p className="text-gray-600">Quiet newsroom. We&apos;ll refresh at 7a/12p/5p ET.</p>
         </div>
       </div>
     )

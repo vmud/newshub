@@ -33,7 +33,7 @@ export class PerplexityProvider implements NewsProvider {
     const companiesStr = companies.join(' OR ')
     const sinceStr = sinceDt.toISOString().split('T')[0] // YYYY-MM-DD format
     
-    const query = `Latest news articles about (${companiesStr}) since ${sinceStr}. Include article title, URL, source domain, and publication date.`
+    const query = `Find recent news articles published since ${sinceStr} about these companies: ${companiesStr}. Return a JSON array with each article having: title, url, source_domain, published_at. Focus on business, technology, and product news.`
     
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -42,7 +42,7 @@ export class PerplexityProvider implements NewsProvider {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-small-128k-online',
+        model: 'sonar-pro',
         messages: [
           {
             role: 'system',
@@ -108,7 +108,7 @@ export class PerplexityProvider implements NewsProvider {
           }
         }
       }
-    } catch (error) {
+    } catch {
       console.warn('Failed to parse JSON from Perplexity response, falling back to text parsing')
       // Fallback: parse from natural language response
       return this.parseFromNaturalLanguage(content, companies)

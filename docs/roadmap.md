@@ -1,10 +1,13 @@
 # NewsHub — Roadmap (v0.1)
+
 *Principle:* Every release ends with a **browser demo** tied to NSM/Driver metrics. RICE is directional.
 
 ## R1 — FrontPage v0 (Weeks 1–2)
+
 **Goal:** Ship the 48-hour demo and stabilize tri-daily ingestion.
 
 ### Epics & Stories
+
 1) **Ingestion baseline (Perplexity+GDELT)**
    - Admin “Ingest now”; stage→normalize→dedupe→publish; provider badges
    - Telemetry: `ingest_run`, `provider_error`, `dedupe_rate`
@@ -23,12 +26,14 @@
    - Weekly Mon/Wed/Fri demo rhythm
 
 ### Success criteria (R1 exit)
+
 - NSM baseline measured; FrontPage p95 ≤ 2.0s
 - News freshness ≤ 12h at each run
 - 0 hallucinations in Top-3 (audit n=30)
 - Dedupe ≤ 15%; preview URL + screencast delivered
 
 ### RICE (R1 candidates)
+
 | Item                       | Reach | Impact | Confidence | Effort | RICE |
 |---------------------------|------:|------:|-----------:|------:|-----:|
 | Ingestion baseline        | 50    | 3     | 0.9        | 2     | 67.5 |
@@ -40,20 +45,24 @@
 ---
 
 ## R2 — Quality & Depth (Weeks 3–4)
+
 **Goal:** Graduate *Snacks* to Top-10 @ **7am**; add search; pilot RSS.
 
-**Scope**
+### Scope
+
 - *Snacks* Pass-2: pre-summarize **Top-10 at 7am**; noon/5p lazy
 - Postgres FTS search (title/source/bullets)
 - RSS adapter (1–3 feeds) with badges
 - Error analytics via Sentry; graceful cache fallback everywhere
 
-**Success criteria (R2 exit)**
+### Success criteria (R2 exit)
+
 - 0 hallucinations in n≥50 audit; p95 summary latency < 2s; avg cost ≤ $0.20/summary
 - Client-News CTR ≥ 30%
-- “Useful at a glance” ≥ 80% (owner quick-score)
+- "Useful at a glance" ≥ 80% (owner quick-score)
 
-**RICE (R2 candidates)**
+### RICE (R2 candidates)
+
 | Item                   | Reach | Impact | Confidence | Effort | RICE |
 |-----------------------|------:|------:|-----------:|------:|-----:|
 | Snacks Top-10 @ 7am   | 60    | 3     | 0.8        | 2     | 72.0 |
@@ -64,34 +73,41 @@
 ---
 
 ## R3 — Experiments & Fit (Weeks 5–6)
+
 **Goal:** Validate UX tweaks & optional signals—only if they move NSM.
 
-**Candidates (behind flags/A/B)**
+### Candidates (behind flags/A/B)
+
 - FrontPage company filter chips
 - Social trending (YouTube/Reddit) module
 - Ranking tweaks (keyword boosts per brand)
 - CompanyHub polish (filings filters, date ranges)
 
-**Graduation rules**
+### Graduation rules
+
 Feature graduates only if: **adoption ≥ 25%**, **time-to-first-click ↓ ≥ 20%**, **CTR not down**, and no p95 perf regressions.
 
 ---
 
 ## Dependencies & Risks
+
 - **Providers:** Perplexity/GDELT uptime & TOS (mitigate via registry/killswitch)
 - **Costs:** cap requests; lazy summaries noon/5p; alert at **$40** of $50 budget
 - **Legal:** display within fair-use/terms; always deep-link to source
 
 ## Demo cadence & governance
-- **Mon:** lock demo goal • **Wed:** preview link + risks • **Fri:** show-don’t-tell demo  
+
+- **Mon:** lock demo goal • **Wed:** preview link + risks • **Fri:** show-don't-tell demo  
 - Mid-sprint changes default to **next release** unless owner override (logged via ADR)
 - Every material choice gets an ADR; Decision Log updated
 
 ## Open Questions
+
 1) First RSS feeds to whitelist?  
 2) Any brand-safe disclaimers on cards?  
 3) Subframe theme tokens (colors/typography) to lock in?
 
 ## Next 48 hours
+
 - **Owner:** confirm any must-have RSS feeds; (optional) brand/theme tokens  
 - **Dev (agent):** ship R1 slice per *FrontPage v0 — Visual Acceptance Card*; post preview URL & screencast; log telemetry

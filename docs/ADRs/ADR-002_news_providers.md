@@ -1,7 +1,9 @@
 # ADR-002 — News Providers (R1)
+
 Date: 2025-08-29 • Status: Accepted
 
-Context
+## Context
+
 Need fresh, broad, low-cost intake for five brands.
 
 Options

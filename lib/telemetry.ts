@@ -4,7 +4,7 @@ export interface TelemetryEvent {
   event: string
   user_id?: string
   article_id?: number
-  payload?: Record<string, any>
+  payload?: Record<string, unknown>
 }
 
 export async function trackEvent(eventData: TelemetryEvent) {

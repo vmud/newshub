@@ -5,7 +5,7 @@ export interface ProviderArticle {
   published_at: string // ISO string
   company_slug: string
   provider: string
-  raw_json: any
+  raw_json: Record<string, unknown>
 }
 
 export interface NewsProvider {

@@ -12,7 +12,6 @@ interface ArticleCardProps {
 
 export function ArticleCard({ article, rank }: ArticleCardProps) {
   const [showSnacks, setShowSnacks] = useState(true)
-  const [hasLintError, setHasLintError] = useState(false)
 
   const handleHeadlineClick = () => {
     trackEvent({

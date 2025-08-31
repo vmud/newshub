@@ -13,6 +13,21 @@ export interface Article {
   snacks_eligible: boolean
 }
 
+interface DatabaseArticle {
+  id: number
+  title: string
+  url: string
+  source_domain: string
+  published_at: string
+  provider: string
+  priority: number
+  summary_bullets?: string[]
+  snacks_eligible: boolean
+  companies: {
+    canonical_name: string
+  }
+}
+
 function isValidUrl(url: string): boolean {
   try {
     const parsed = new URL(url)
@@ -61,7 +76,7 @@ export async function getTop10Articles(): Promise<Article[]> {
       return []
     }
 
-    const validArticles = articles?.filter((article: any) => {
+    const validArticles = articles?.filter((article: DatabaseArticle) => {
       // Filter out invalid articles
       if (!isValidTitle(article.title)) {
         logArticleSkipped(article.id, article.provider, 'invalid_title')
@@ -81,7 +96,7 @@ export async function getTop10Articles(): Promise<Article[]> {
       return true
     }) || []
 
-    return validArticles.slice(0, 10).map((article: any, index: number) => ({
+    return validArticles.slice(0, 10).map((article: DatabaseArticle, index: number) => ({
       id: article.id,
       company_canonical: article.companies.canonical_name,
       title: article.title,
