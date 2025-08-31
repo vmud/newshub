@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { Article } from '@/lib/articles'
 import { ArticleCard } from './ArticleCard'
+import { AdminPanel } from './AdminPanel'
 import { trackEvent } from '@/lib/telemetry'
 import { RefreshCw } from 'lucide-react'
 
@@ -88,6 +89,8 @@ export function FrontPage({ articles, isLoading = false, hasError = false }: Fro
         <h1 className="text-3xl font-bold text-gray-900 mb-2">NewsHub</h1>
         <p className="text-gray-600">Your daily brief on the companies that matter</p>
       </header>
+
+      <AdminPanel />
       
       <div className="grid gap-4">
         {articles.map((article, index) => (
