@@ -13,6 +13,24 @@ export interface Article {
   snacks_eligible: boolean
 }
 
+function isValidUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+function isValidTitle(title: string): boolean {
+  return Boolean(title && title.trim().length >= 3)
+}
+
+function logArticleSkipped(articleId: number, provider: string, reason: string) {
+  console.warn(`Article skipped: ID ${articleId}, Provider ${provider}, Reason: ${reason}`)
+  // TODO: Send to Sentry when available
+}
+
 export async function getTop10Articles(): Promise<Article[]> {
   try {
     if (!supabase) {
@@ -20,6 +38,7 @@ export async function getTop10Articles(): Promise<Article[]> {
       return []
     }
 
+    // Fetch more than 10 to account for filtering
     const { data: articles, error } = await supabase
       .from('articles')
       .select(`
@@ -35,14 +54,34 @@ export async function getTop10Articles(): Promise<Article[]> {
       `)
       .order('priority', { ascending: false })
       .order('published_at', { ascending: false })
-      .limit(10)
+      .limit(20)
 
     if (error) {
       console.error('Error fetching articles:', error)
       return []
     }
 
-    return articles?.map((article: any, index: number) => ({
+    const validArticles = articles?.filter((article: any) => {
+      // Filter out invalid articles
+      if (!isValidTitle(article.title)) {
+        logArticleSkipped(article.id, article.provider, 'invalid_title')
+        return false
+      }
+      
+      if (!article.url || !isValidUrl(article.url)) {
+        logArticleSkipped(article.id, article.provider, 'invalid_url')
+        return false
+      }
+      
+      if (article.url.includes('example.com')) {
+        logArticleSkipped(article.id, article.provider, 'example_url_placeholder')
+        return false
+      }
+      
+      return true
+    }) || []
+
+    return validArticles.slice(0, 10).map((article: any, index: number) => ({
       id: article.id,
       company_canonical: article.companies.canonical_name,
       title: article.title,
@@ -53,7 +92,7 @@ export async function getTop10Articles(): Promise<Article[]> {
       priority: article.priority,
       summary_bullets: article.summaries?.[0]?.bullets || null,
       snacks_eligible: index < 3 // Top-3 are eligible for Snacks
-    })) || []
+    }))
   } catch (error) {
     console.error('Failed to fetch articles:', error)
     return []

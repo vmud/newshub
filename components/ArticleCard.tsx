@@ -18,7 +18,11 @@ export function ArticleCard({ article, rank }: ArticleCardProps) {
     trackEvent({
       event: 'headline_clicked',
       article_id: article.id,
-      payload: { position: rank, source: 'homepage' }
+      payload: { 
+        position: rank, 
+        source: 'homepage',
+        source_domain: article.source_domain 
+      }
     })
   }
 
@@ -36,6 +40,15 @@ export function ArticleCard({ article, rank }: ArticleCardProps) {
     return `${diffDays}d ago`
   }
 
+  const isValidUrl = (url: string): boolean => {
+    try {
+      const parsed = new URL(url)
+      return (parsed.protocol === 'http:' || parsed.protocol === 'https:') && !url.includes('example.com')
+    } catch {
+      return false
+    }
+  }
+
   const renderContent = () => {
     if (article.snacks_eligible && showSnacks && article.summary_bullets) {
       if (hasLintError) {
@@ -45,24 +58,53 @@ export function ArticleCard({ article, rank }: ArticleCardProps) {
               <AlertTriangle size={16} />
               <span className="bg-orange-100 px-2 py-1 rounded text-xs">style retry</span>
             </div>
-            <p className="text-gray-600 line-clamp-3">{article.title}</p>
+            <a 
+              href={article.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleHeadlineClick}
+              className="text-gray-900 hover:text-blue-600 font-medium block"
+            >
+              {article.title}
+            </a>
           </div>
         )
       }
       
       return (
-        <div className="space-y-2">
-          {article.summary_bullets.map((bullet: string, index: number) => (
-            <div key={index} className="flex items-start gap-2">
-              <span className="text-blue-500 mt-1">•</span>
-              <p className="text-gray-700 text-sm">{bullet}</p>
-            </div>
-          ))}
+        <div className="space-y-3">
+          <a 
+            href={article.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleHeadlineClick}
+            className="text-gray-900 hover:text-blue-600 font-medium block text-lg leading-tight"
+          >
+            {article.title}
+          </a>
+          <div className="space-y-2">
+            {article.summary_bullets.map((bullet: string, index: number) => (
+              <div key={index} className="flex items-start gap-2">
+                <span className="text-blue-500 mt-1">•</span>
+                <p className="text-gray-700 text-sm">{bullet}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )
     }
     
-    return <p className="text-gray-600 line-clamp-3">{article.title}</p>
+    return (
+      <a 
+        href={article.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={handleHeadlineClick}
+        className="text-gray-900 hover:text-blue-600 font-medium block text-lg leading-tight"
+      >
+        {article.title}
+      </a>
+    )
   }
 
   return (
@@ -97,16 +139,23 @@ export function ArticleCard({ article, rank }: ArticleCardProps) {
 
       <div className="flex items-center justify-between">
         <span className="text-gray-500 text-xs">{article.source_domain}</span>
-        <a
-          href={article.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={handleHeadlineClick}
-          className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm"
-        >
-          Read more
-          <ExternalLink size={14} />
-        </a>
+        {isValidUrl(article.url) ? (
+          <a
+            href={article.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleHeadlineClick}
+            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm"
+          >
+            Read more
+            <ExternalLink size={14} />
+          </a>
+        ) : (
+          <span className="flex items-center gap-1 text-gray-400 text-xs">
+            <AlertTriangle size={12} />
+            Unavailable
+          </span>
+        )}
       </div>
     </div>
   )
