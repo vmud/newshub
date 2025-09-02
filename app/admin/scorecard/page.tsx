@@ -2,10 +2,12 @@ import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 
 // Server-side client with service role for admin access
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+const supabaseAdmin = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+  : null
 
 interface ProviderScorecard {
   provider: string
@@ -33,6 +35,11 @@ interface SnacksCost {
 }
 
 async function getProviderScorecard(): Promise<ProviderScorecard[]> {
+  if (!supabaseAdmin) {
+    console.warn('Supabase admin client not configured')
+    return []
+  }
+  
   const { data, error } = await supabaseAdmin
     .from('provider_scorecard_24h')
     .select('*')
@@ -47,6 +54,11 @@ async function getProviderScorecard(): Promise<ProviderScorecard[]> {
 }
 
 async function getCompanyCoverage(): Promise<CompanyCoverage[]> {
+  if (!supabaseAdmin) {
+    console.warn('Supabase admin client not configured')
+    return []
+  }
+  
   const { data, error } = await supabaseAdmin
     .from('company_coverage_24h')
     .select('*')
@@ -61,6 +73,11 @@ async function getCompanyCoverage(): Promise<CompanyCoverage[]> {
 }
 
 async function getSnacksCost(): Promise<SnacksCost[]> {
+  if (!supabaseAdmin) {
+    console.warn('Supabase admin client not configured')
+    return []
+  }
+  
   const { data, error } = await supabaseAdmin
     .from('snacks_cost_24h')
     .select('*')

@@ -1,4 +1,6 @@
 import { NewsProvider, ProviderArticle } from './types'
+import { cache } from '@/lib/upstash'
+import crypto from 'crypto'
 
 interface GDELTArticle {
   title: string
@@ -33,6 +35,29 @@ export class GDELTProvider implements NewsProvider {
     const startDate = this.formatGDELTDate(sinceDt)
     const endDate = this.formatGDELTDate(new Date())
     
+    // Create cache key based on query parameters
+    const cacheKey = crypto.createHash('md5')
+      .update(`${company}-${startDate}-${endDate}`)
+      .digest('hex')
+    
+    // Check cache first
+    const cached = await cache.getArticleCache('gdelt', cacheKey)
+    if (cached && cached.length > 0) {
+      console.log(`[GDELT] Using cached results for ${company} (${cached.length} articles)`)
+      return cached.map((article: Record<string, unknown>) => ({
+        title: article.title as string,
+        url: article.url as string,
+        source_domain: article.source_domain as string,
+        published_at: article.published_at as string,
+        company_slug: article.company_slug as string,
+        provider: this.name,
+        raw_json: {
+          ...(article.raw_json as Record<string, unknown>),
+          cached: true
+        }
+      }))
+    }
+    
     // GDELT query parameters
     const params = new URLSearchParams({
       query: `"${company}"`,
@@ -46,6 +71,7 @@ export class GDELTProvider implements NewsProvider {
     })
 
     const url = `${this.baseUrl}/doc/doc?${params}`
+    console.log(`[GDELT] Fetching fresh data for ${company}`)
     
     const response = await fetch(url, {
       headers: {
@@ -63,13 +89,21 @@ export class GDELTProvider implements NewsProvider {
       return []
     }
 
-    return data.articles
+    const processedArticles = data.articles
       .filter((article: GDELTArticle) => this.isValidArticle(article))
       .map((article: GDELTArticle) => this.transformArticle(article, company))
+
+    // Cache the results for 30 minutes
+    if (processedArticles.length > 0) {
+      await cache.setArticleCache('gdelt', cacheKey, processedArticles, 1800)
+      console.log(`[GDELT] Cached ${processedArticles.length} articles for ${company}`)
+    }
+
+    return processedArticles
   }
 
   private isValidArticle(article: GDELTArticle): boolean {
-    return (
+    return Boolean(
       article.title &&
       article.url &&
       article.domain &&

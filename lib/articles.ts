@@ -13,20 +13,7 @@ export interface Article {
   snacks_eligible: boolean
 }
 
-interface DatabaseArticle {
-  id: number
-  title: string
-  url: string
-  source_domain: string
-  published_at: string
-  provider: string
-  priority: number
-  summary_bullets?: string[]
-  snacks_eligible: boolean
-  companies: {
-    canonical_name: string
-  }
-}
+
 
 function isValidUrl(url: string): boolean {
   try {
@@ -64,6 +51,7 @@ export async function getTop10Articles(): Promise<Article[]> {
         published_at,
         provider,
         priority,
+        snacks_eligible,
         companies!inner(canonical_name),
         summaries(bullets)
       `)
@@ -76,7 +64,7 @@ export async function getTop10Articles(): Promise<Article[]> {
       return []
     }
 
-    const validArticles = articles?.filter((article: DatabaseArticle) => {
+    const validArticles = articles?.filter((article) => {
       // Filter out invalid articles
       if (!isValidTitle(article.title)) {
         logArticleSkipped(article.id, article.provider, 'invalid_title')
@@ -96,9 +84,9 @@ export async function getTop10Articles(): Promise<Article[]> {
       return true
     }) || []
 
-    return validArticles.slice(0, 10).map((article: DatabaseArticle, index: number) => ({
+    return validArticles.slice(0, 10).map((article, index) => ({
       id: article.id,
-      company_canonical: article.companies.canonical_name,
+      company_canonical: article.companies[0]?.canonical_name || 'Unknown',
       title: article.title,
       url: article.url,
       source_domain: article.source_domain,

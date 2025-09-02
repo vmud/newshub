@@ -34,6 +34,9 @@ export function FrontPage({ articles, isLoading = false, hasError = false }: Fro
           <div className="h-8 bg-gray-200 rounded animate-pulse mb-2"></div>
           <div className="h-4 bg-gray-200 rounded animate-pulse w-1/3"></div>
         </div>
+        
+        <AdminPanel />
+        
         <div className="grid gap-4">
           {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -60,6 +63,9 @@ export function FrontPage({ articles, isLoading = false, hasError = false }: Fro
           <h1 className="text-3xl font-bold text-gray-900 mb-2">NewsHub</h1>
           <p className="text-gray-600">Your daily brief on the companies that matter</p>
         </header>
+        
+        <AdminPanel />
+        
         <div className="text-center py-12">
           <p className="text-gray-600 mb-2">Cached from last run</p>
           <p className="text-gray-500 text-sm">Quiet newsroom. We&apos;ll refresh at 7a/12p/5p ET.</p>
@@ -75,6 +81,9 @@ export function FrontPage({ articles, isLoading = false, hasError = false }: Fro
           <h1 className="text-3xl font-bold text-gray-900 mb-2">NewsHub</h1>
           <p className="text-gray-600">Your daily brief on the companies that matter</p>
         </header>
+        
+        <AdminPanel />
+        
         <div className="text-center py-12">
           <RefreshCw className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <p className="text-gray-600">Quiet newsroom. We&apos;ll refresh at 7a/12p/5p ET.</p>

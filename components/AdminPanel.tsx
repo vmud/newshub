@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { RefreshCw, Activity, AlertCircle, CheckCircle } from 'lucide-react'
+import { RefreshCw, Activity, AlertCircle, CheckCircle, BarChart3 } from 'lucide-react'
+import Link from 'next/link'
 
 interface IngestionStatus {
   success: boolean
@@ -64,14 +65,24 @@ export function AdminPanel() {
           Admin Panel
         </h3>
         
-        <button
-          onClick={handleIngestNow}
-          disabled={isIngesting}
-          className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <RefreshCw size={14} className={isIngesting ? 'animate-spin' : ''} />
-          {isIngesting ? 'Ingesting...' : 'Ingest now'}
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/scorecard"
+            className="flex items-center gap-2 px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+          >
+            <BarChart3 size={14} />
+            Scorecard
+          </Link>
+          
+          <button
+            onClick={handleIngestNow}
+            disabled={isIngesting}
+            className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw size={14} className={isIngesting ? 'animate-spin' : ''} />
+            {isIngesting ? 'Ingesting...' : 'Ingest now'}
+          </button>
+        </div>
       </div>
 
       {lastStatus && (

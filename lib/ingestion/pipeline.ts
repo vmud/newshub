@@ -1,16 +1,18 @@
 import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { PerplexityProvider } from '@/lib/providers/perplexity'
 import { GDELTProvider } from '@/lib/providers/gdelt'
+import { AINewsProvider } from '@/lib/providers/ai-news'
 import { NewsProvider, ProviderArticle, IngestionResult, IngestionRunSummary } from '@/lib/providers/types'
 import { trackEvent } from '@/lib/telemetry'
 
-// Company aliases from config
+// Company aliases from config - these should match the database canonical names
 const COMPANY_ALIASES: Record<string, string[]> = {
-  'qualcomm': ['Qualcomm', 'Snapdragon'],
-  'google': ['Google', 'Android', 'Pixel'],
-  'samsung': ['Samsung', 'Galaxy'],
-  'whirlpool': ['Whirlpool', 'KitchenAid', 'Maytag'],
-  'bestbuy': ['Best Buy', 'Geek Squad']
+  'Qualcomm': ['Qualcomm', 'Snapdragon'],
+  'Google': ['Google', 'Android', 'Pixel'],
+  'Samsung': ['Samsung', 'Galaxy'],
+  'Whirlpool': ['Whirlpool', 'KitchenAid', 'Maytag'],
+  'Best Buy': ['Best Buy', 'Geek Squad']
 }
 
 // Priority weights for source domains
@@ -44,8 +46,14 @@ export class IngestionPipeline {
   }
 
   private initializeProviders() {
-    const enabledProviders = (process.env.NEWS_PROVIDERS || 'perplexity,gdelt').split(',')
+    const enabledProviders = (process.env.NEWS_PROVIDERS || 'ai-news,gdelt').split(',')
     
+    // Use AI Gateway for news ingestion (replaces Perplexity)
+    if (enabledProviders.includes('ai-news')) {
+      this.providers.push(new AINewsProvider())
+    }
+    
+    // Keep Perplexity as fallback if explicitly enabled
     if (enabledProviders.includes('perplexity') && process.env.PPLX_API_KEY) {
       this.providers.push(new PerplexityProvider(process.env.PPLX_API_KEY))
     }
@@ -60,20 +68,38 @@ export class IngestionPipeline {
     const results: IngestionResult[] = []
     const allErrors: string[] = []
 
-    console.log(`Starting ingestion run (scheduled: ${scheduled})`)
+    console.log(`[PIPELINE] Starting ingestion run (scheduled: ${scheduled})`)
+    
+    // Check if providers are initialized
+    if (this.providers.length === 0) {
+      const error = 'No providers configured - check NEWS_PROVIDERS environment variable'
+      console.error(`[PIPELINE] ${error}`)
+      allErrors.push(error)
+      return {
+        providerCounts: {},
+        totalItems: 0,
+        dedupeRate: 0,
+        lastRunTs: startTime.toISOString(),
+        errors: allErrors
+      }
+    }
 
     // Get all company aliases
     const allAliases = Object.values(COMPANY_ALIASES).flat()
     const sinceDt = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days for better coverage
+    
+    console.log(`[PIPELINE] Processing ${allAliases.length} company aliases with ${this.providers.length} providers`)
 
     // Fetch from each provider
     for (const provider of this.providers) {
       try {
-        console.log(`Fetching from provider: ${provider.name}`)
+        console.log(`[PIPELINE] Fetching from provider: ${provider.name}`)
         const articles = await provider.fetch(allAliases, sinceDt)
+        console.log(`[PIPELINE] Provider ${provider.name} returned ${articles.length} articles`)
         
         const processed = await this.processArticles(articles, provider.name)
         results.push(processed)
+        console.log(`[PIPELINE] Provider ${provider.name} processed: ${processed.itemCount} items, ${processed.dedupeRate.toFixed(1)}% deduped`)
         
         // Track provider success
         await trackEvent({
@@ -87,26 +113,37 @@ export class IngestionPipeline {
         })
         
       } catch (error) {
-        const errorMsg = `Provider ${provider.name} failed: ${error}`
-        console.error(errorMsg)
-        allErrors.push(errorMsg)
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        const fullErrorMsg = `Provider ${provider.name} failed: ${errorMsg}`
+        console.error(`[PIPELINE] ${fullErrorMsg}`)
+        allErrors.push(fullErrorMsg)
+        
+        // Add empty result for failed provider
+        results.push({
+          provider: provider.name,
+          itemCount: 0,
+          dedupeRate: 0,
+          articles: [],
+          errors: [errorMsg]
+        })
         
         await trackEvent({
           event: 'provider_error',
           payload: {
             provider: provider.name,
             type: this.classifyError(error),
-            error: String(error)
+            error: errorMsg
           }
         })
       }
     }
 
     // Record ingestion run
-    if (supabase) {
+    const dbClient = supabaseAdmin || supabase
+    if (dbClient) {
       for (const result of results) {
         try {
-          await supabase.from('ingestion_runs').insert({
+          await dbClient.from('ingestion_runs').insert({
             provider: result.provider,
             item_count: result.itemCount,
             dedupe_rate: result.dedupeRate,
@@ -146,19 +183,23 @@ export class IngestionPipeline {
     const errors: string[] = []
     let duplicateCount = 0
 
-    if (!supabase) {
-      throw new Error('Supabase client not configured')
+    // Use admin client for server-side operations, fallback to regular client or mock
+    const dbClient = supabaseAdmin || supabase
+    
+    if (!dbClient) {
+      console.warn('[PIPELINE] No database client configured - using mock storage for development')
+      return this.mockProcessArticles(articles, provider)
     }
 
     // Get company ID mapping
-    const { data: companies } = await supabase
+    const { data: companies } = await dbClient
       .from('companies')
       .select('id, canonical_name')
     
-    const companyMap = new Map<string, string>()
+    const companyMap = new Map<string, number>()
     companies?.forEach(c => {
-      const canonical = c.canonical_name.toLowerCase()
-      companyMap.set(canonical, c.id)
+      const canonical = c.canonical_name
+      companyMap.set(canonical.toLowerCase(), c.id)
       
       // Add alias mappings
       const aliases = COMPANY_ALIASES[canonical] || []
@@ -167,12 +208,16 @@ export class IngestionPipeline {
       })
     })
 
+    console.log(`[PIPELINE] Processing ${articles.length} articles for provider ${provider}`)
+    console.log(`[PIPELINE] Company map has ${companyMap.size} entries`)
+    
     for (const article of articles) {
       try {
         // Validate article
         if (!this.isValidArticle(article)) {
           const reason = this.getValidationFailureReason(article)
           errors.push(`Invalid article: ${reason}`)
+          console.log(`[PIPELINE] Invalid article: ${reason} - ${article.title?.substring(0, 50)}`)
           
           await trackEvent({
             event: 'article_skipped_invalid_url',
@@ -188,10 +233,25 @@ export class IngestionPipeline {
         // Normalize and compute url_norm for deduplication
         const urlNorm = this.normalizeUrlForDedup(article.url)
         
-        // Get company ID
-        const companyId = companyMap.get(article.company_slug.toLowerCase())
+        // Get company ID - try multiple lookup strategies
+        let companyId = companyMap.get(article.company_slug.toLowerCase())
+        console.log(`[PIPELINE] Looking up company: ${article.company_slug} -> ${companyId || 'NOT FOUND'}`)
+        
+        // If not found, try to find by partial match
+        if (!companyId) {
+          for (const [key, id] of companyMap.entries()) {
+            if (key.includes(article.company_slug.toLowerCase()) || 
+                article.company_slug.toLowerCase().includes(key)) {
+              companyId = id
+              console.log(`[PIPELINE] Found company by partial match: ${key} -> ${id}`)
+              break
+            }
+          }
+        }
+        
         if (!companyId) {
           errors.push(`Unknown company: ${article.company_slug}`)
+          console.log(`[PIPELINE] Unknown company: ${article.company_slug} (available: ${Array.from(companyMap.keys()).join(', ')})`)
           continue
         }
 
@@ -212,7 +272,8 @@ export class IngestionPipeline {
         }
 
         // Upsert article (handle duplicates)
-        const { error } = await supabase
+        console.log(`[PIPELINE] Inserting article: ${article.title.substring(0, 50)}... company_id=${companyId}`)
+        const { error } = await dbClient
           .from('articles')
           .upsert(articleData, {
             onConflict: 'url_norm',
@@ -222,11 +283,14 @@ export class IngestionPipeline {
         if (error) {
           if (error.message.includes('duplicate') || error.code === '23505') {
             duplicateCount++
+            console.log(`[PIPELINE] Duplicate article: ${article.title.substring(0, 50)}`)
           } else {
             errors.push(`Database error for "${article.title}": ${error.message}`)
+            console.error(`[PIPELINE] Database error: ${error.message} for article: ${article.title.substring(0, 50)}`)
           }
         } else {
           processedArticles.push(article)
+          console.log(`[PIPELINE] Successfully inserted: ${article.title.substring(0, 50)}`)
         }
 
       } catch (error) {
@@ -317,7 +381,59 @@ export class IngestionPipeline {
     if (errorStr.includes('json') || errorStr.includes('parse')) {
       return 'schema'
     }
+    if (errorStr.includes('credits') || errorStr.includes('gateway')) {
+      return 'api_credits'
+    }
+    if (errorStr.includes('supabase')) {
+      return 'database'
+    }
     
     return 'unknown'
+  }
+  
+  private async mockProcessArticles(articles: ProviderArticle[], provider: string): Promise<IngestionResult> {
+    const processedArticles: ProviderArticle[] = []
+    const errors: string[] = []
+    let duplicateCount = 0
+    
+    // Create a simple in-memory deduplication
+    const seenUrls = new Set<string>()
+    
+    for (const article of articles) {
+      try {
+        // Validate article
+        if (!this.isValidArticle(article)) {
+          const reason = this.getValidationFailureReason(article)
+          errors.push(`Invalid article: ${reason}`)
+          continue
+        }
+        
+        // Normalize URL for deduplication
+        const urlNorm = this.normalizeUrlForDedup(article.url)
+        
+        if (seenUrls.has(urlNorm)) {
+          duplicateCount++
+          continue
+        }
+        
+        seenUrls.add(urlNorm)
+        processedArticles.push(article)
+        
+      } catch (error) {
+        errors.push(`Processing error for "${article.title}": ${error}`)
+      }
+    }
+    
+    const dedupeRate = articles.length > 0 ? (duplicateCount / articles.length) * 100 : 0
+    
+    console.log(`[PIPELINE-MOCK] Processed ${processedArticles.length} articles, ${duplicateCount} duplicates, ${errors.length} errors`)
+    
+    return {
+      provider,
+      itemCount: processedArticles.length,
+      dedupeRate,
+      articles: processedArticles,
+      errors
+    }
   }
 }

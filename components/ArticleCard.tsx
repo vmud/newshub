@@ -50,25 +50,6 @@ export function ArticleCard({ article, rank }: ArticleCardProps) {
 
   const renderContent = () => {
     if (article.snacks_eligible && showSnacks && article.summary_bullets) {
-      if (hasLintError) {
-        return (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-orange-600 text-sm">
-              <AlertTriangle size={16} />
-              <span className="bg-orange-100 px-2 py-1 rounded text-xs">style retry</span>
-            </div>
-            <a 
-              href={article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleHeadlineClick}
-              className="text-gray-900 hover:text-blue-600 font-medium block"
-            >
-              {article.title}
-            </a>
-          </div>
-        )
-      }
       
       return (
         <div className="space-y-3">

@@ -1,0 +1,50 @@
+# AI Gateway Configuration for NewsHub
+# This file documents the current AI Gateway setup and model configuration
+
+gateway:
+  base_url: "https://ai-gateway.vercel.sh/v1"
+  headers:
+    x-title: "NewsHub"
+    http-referer: "https://newshub.vercel.app"
+
+models:
+  snacks:
+    primary: "anthropic/claude-3-5-sonnet-20241022"
+    fallback: "openai/gpt-4o-mini"
+    tags:
+      feature: "snacks"
+      run: "cron-7am"
+    max_tokens: 2000
+    temperature: 0.1
+
+  news:
+    primary: "anthropic/claude-3-5-sonnet-20241022"
+    fallback: "openai/gpt-4o-mini"
+    tags:
+      feature: "news-ingestion"
+      run: "cron-7am"
+    max_tokens: 2000
+    temperature: 0.1
+
+# How to switch models:
+# 1. Update the primary/fallback model names in lib/ai-gateway.ts
+# 2. Or use the updateModelConfig() function at runtime
+# 3. Available models: anthropic/claude-3-5-sonnet-20241022, openai/gpt-4o-mini, openai/gpt-4o
+
+# Rate limiting for proxy endpoints
+rate_limits:
+  gdelt:
+    max_requests: 100
+    window_ms: 3600000  # 1 hour
+    
+  edgar:
+    max_requests: 50
+    window_ms: 3600000  # 1 hour
+
+# Observability tags
+observability:
+  default_tags:
+    - "feature:snacks"
+    - "feature:news-ingestion"
+    - "run:cron-7am"
+    - "provider:ai-gateway"
